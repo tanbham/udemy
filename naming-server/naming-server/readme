@@ -1,0 +1,35 @@
+In CurrecnyExchangeProxy Interface we are hardcoding the value url="localhost:8000"
+What if in future there are new instances? We need to come back and add the instances in variable url.
+What is the solution? ==> Service Registry or Naming Server
+All the MicroServices will be looking for the active intances of other MicroServices from the Naming Server or Service Registry
+CurrecnyExhchangeMicroService	CurrecnyConversionMicroService	MicroServiceX	MicrServiceY
+	\                             \                               /                  /
+	 \							   \                             /                  /
+	  \ 							\                           /                  /
+	  							Naming Server (Service Registry)
+
+https://start.spring.io  --> to create a Naming Server (Eureka Server)
+Dependency choosen :
+Spring Boot DevTools
+Spring Boot Actuator
+Eureka
+
+- @EnableEurekaServer - annotate the NamingServerApplication class
+- add few things in application.properties
+- add the below dependency in currecny-conversion-service and currency-exchange-service
+	<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+	</dependency>
+- add the below in application.properties in both of the services
+	eureka.client.serviceUrl.defaultZone=http://localhost:8761/eureka
+- Now everytime the microservices will start up they will register themselves on Eureka
+- Now when the proxy is called from currecny-conversion service controller, the feign client goes to Eureka, it asks for the 
+available instance of currecny-exchange microservice 
+- Try the URL (https://localhost:8100/currency-conversion-feign/from/USD/to/INR/quantity/10)--> and check logs
+
+LoadBalancing between currency-exchange microservice running on port 8000 and 8001
+- Eureka comes with the feature of load balancing
+- Simply keep FeignClient(name = "currecny-exchange") instead of FeignClient(name = "currecny-exchange", url="localhost:8000")
+  in CurrencyExchangeProxy Interface
+  
