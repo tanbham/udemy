@@ -1,0 +1,53 @@
+Currency Exchange Microservice --> Gives back the exchange rate of one currency 
+in another
+
+https://start.spring.io  --> to create a spring project
+Dependency choosen :
+Spring Web
+DevTools
+Actuator 
+Config Client
+
+URL
+http://localhost:8000/currency-exchange/from/USD/to/INR
+Response Structure
+{
+   "id":10001,
+   "from":"USD",
+   "to":"INR",
+   "conversionMultiple":65.00,
+   "environment":"8000 instance-id"
+}
+
+Creating 2 instances of the application running on two different ports
+Do the following changes in run configuration :
+1)Right click on first application running on 8000 on the left 
+2)select the option as duplicate, modify to 8001
+3)Make the changes in  VM argument field ==> -Dserver.port=8001
+4)Below are the two instances of one single application running on two different ports
+http://localhost:8000/currency-exchange/from/USD/to/INR
+http://localhost:8001/currency-exchange/from/USD/to/INR
+
+Resilience4j concept
+Microservice1  --> Microservice2 --> Microservice3 --> Microservice4 --> Microservice5
+- added dependencies --> aop, resilience4j
+- Retry concept explained in controller class
+	Logs:
+	2022-07-31 08:25:19.358  INFO 36104 --- [nio-8000-exec-1] c.u.c.c.CircuitBreakerController         : Sample API called
+	2022-07-31 08:25:21.930  INFO 36104 --- [nio-8000-exec-1] c.u.c.c.CircuitBreakerController         : Sample API called
+	2022-07-31 08:25:24.476  INFO 36104 --- [nio-8000-exec-1] c.u.c.c.CircuitBreakerController         : Sample API called
+	2022-07-31 08:25:26.563 ERROR 36104 --- [nio-8000-exec-1] o.a.c.c.C.[.[.[/].[dispatcherServlet]    : Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception [Request processing failed; nested exception is org.springframework.web.client.ResourceAccessException: I/O error on GET request for "http://localhost:8080/dummy-call": Connection refused: connect; 
+nested exception is java.net.ConnectException: Connection refused: connect] with root cause
+java.net.ConnectException: Connection refused: connect
+- default retry is 3
+- fallbackmethod
+- custom retry can be set in application.properties
+- time between retries can be set
+- exponential retry time can be set 
+- circuit breaker concept
+	If there are continuous calls to a webservice which is failing, it will stop calling the webservice after a certain
+	threshold and then will retrun back the fallback method ka response. This will not overload the webservice
+	How to test? call the webservice multiple times and check the logs, after certain number of calls the logs will stop on
+	the response which is sent by the fallback method
+	Thus it will break the circuit and will directly return the response back.
+- rate limiter feature - explained in application.properties
