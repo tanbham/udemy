@@ -1,0 +1,16 @@
+https://start.spring.io/
+Eureka Discover Client --> to register to the Eureka
+Spring Boot Actuator
+Gateway
+Spring Boot Dev-Tools
+
+Need of API Gateways
+Multiple microservices has common properties such as authentication, authorization, etc
+To implement these common things we make use of API Gateway
+
+-check application of properties file
+
+Calling webservices Via API Gateway
+http://localhost:8765/<namefromEureka>/<originalurl>
+http://localhost:8765/CURRENCY-CONVERSION/currency-conversion-feign/from/USD/to/INR/quantity/10
+http://localhost:8765/CURRENCY-CONVERSION/currency-exchange/from/USD/to/INR
