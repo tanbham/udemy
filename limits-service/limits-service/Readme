@@ -1,0 +1,85 @@
+GOAL:
+
+Limits MicroService MicroServiceX MicroServiceY
+		||				//         //
+		||			   //         //
+		||            //         //
+Spring Cloud Config Server
+		||
+		||
+		||
+     Git Repo
+
+https://start.spring.io  --> to create a Limits Service Microservice 
+Dependency choosen :
+Spring Web
+DevTools
+Actuator 
+Config Client
+
+Application.properties file:
+microservice needs to communicate with config server whose port is 8888
+Instead of sending the hardcoded values in controller, we are setting up the values in appl.properties file
+We have created the Configuration class to match the structure
+
+https://start.spring.io  --> to create Spring Cloud Config Server
+Dependency choosen :
+Spring Boot DevTools
+Config Server
+
+Connecting the Spring Cloud Config Server to Git
+Created a local repository in accenture laptop --> git-localconfig-repo
+Created a file inside directory git-localconfig-repo --> limits-service.properties
+Copy pasted the below content which was defined in Limits Service into the file limits-service.properties
+limits-service.minimum=2
+limits-service.maximum=10000
+Executed below git commands
+-->git add *
+-->git commit -m "adding limis-service.properties file"
+Added annotation "@EnableConfigServer" to the SpringCloudConfigServerApplication
+Check the output ---> http://localhost:8888/limits-service/default
+
+Connecting Limits Microservice to Spring Cloud Config Server
+We have already introduced spring.config.import in the application.properties of Limits Microservice
+One more property added is below
+spring.application.name=limits-service
+limits-service is the application name stored in git by name limits-service.properties,
+we want to use the values inside the file limits-service.properties which is now in git and from above step the
+Spring-Cloud-Config server is connected already connected to git
+After restarting the limits service application we get below outout
+Fetching config from server at : http://localhost:8888
+Located environment: name=limits-service, profiles=[default], label=null, version=936052e02afd21f08945f793d91c9eee297ce332, state=null
+It fetches the content from http://localhost:8888/default
+
+
+Configuring profiles for Limits Service (Dev and QA)
+create limis-service-dev.properties same like limis-service.properties with different values
+create limis-service-qa.properties same like limis-service.properties with different values
+Add the below in application.properties of limits service to select the profile related data
+spring.cloud.config.profile=dev
+or spring.cloud.config.profile=qa
+============================================================================================================
+Checking the output:
+Start the application spring-cloud-config-server
+OUTPUT LOGS:
+Tomcat started on port(s): 8888 (http) with context path ''
+Started SpringCloudConfigServerApplication in 5.076 seconds (JVM running for 5.987)
+
+Start the application limits-service
+OUTPUT LOGS:
+Fetching config from server at : http://localhost:8888
+Located environment: name=limits-service, profiles=[default], label=null, version=78064c8ce56f9c1002aa00ce4f05bf542de8a80d, state=null
+Tomcat started on port(s): 8082 (http) with context path ''
+Started LimitsServiceApplication in 7.774 seconds (JVM running for 8.501)
+
+http://localhost:8082/limits
+{"minimum":2,"maximum":10000}
+=============================================================================================================
+What is happening?
+1)We started spring-cloud-config-server
+2)We started limits-service application
+3)It is fetching the information from spring-cloud-server which is connected to git
+4)limits-service application is fetching the min and max values from limits-service.properties file located in
+git via spring-cloud config server.
+5)In limits-service application ka application.properties file if we uncomment spring.cloud.config.profile=dev then
+it will fetch the value from limits-service-dev.properties file
